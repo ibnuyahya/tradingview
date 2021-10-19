@@ -19,29 +19,51 @@
   "allow_symbol_change": true,
   "save_image": false,
   "details": true,
-  "studies": [
-    "BB@tv-basicstudies",
-    "RSI@tv-basicstudies",
-    "MACD@tv-basicstudies",
-     {
-     "id": "MAExp@tv-basicstudies",
-     "version": 60,
-	 "color": '#0000FF',
-     "inputs": { 
-       "length": 50
-     }
+ "studies": [
+   {
+     "id": "BB@tv-basicstudies",
+
    },
+   {
+     "id": "RSI@tv-basicstudies",
+
+   },
+   {
+     "id": "MACD@tv-basicstudies",
+
+   },
+    
     {
      "id": "MAExp@tv-basicstudies",
      "version": 60,
+	
+     "inputs": {
+       "length": 50,
+
+     }
+   },
+   {
+     "id": "MAExp@tv-basicstudies",
+     "version": 60,
+
      "inputs": {
        "length": 200
-     },
-	 },
+     }
+   },
+ 
   ],
+    "studies_overrides": {
+            "rsi.rsi.plot.color": "#000000",
+            "rsi.level.0": 20,
+            "rsi.level.1": 80,
+  },
   "container_id": "tradingview_f6279"
+
+
 }
+ 
   );
+ 
   </script>
 </div>
 <!-- TradingView Widget END -->
