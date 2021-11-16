@@ -1,0 +1,75 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
+
+var ct = getUrlParameter('ct');
+var symbols = 'BINANCE:'+ct+'USDT';
+
+
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div id="tradingview_dca57"></div>
+  <div class="tradingview-widget-copyright"><a href="https://id.tradingview.com/symbols/BTCUSDT/?exchange=BYBIT" rel="noopener" target="_blank"><span class="blue-text">BTCUSDT Chart</span></a> oleh TradingView</div>
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+  new TradingView.widget(
+  {
+  "autosize": true,
+  "symbol": symbols,
+  "interval": "60",
+  "timezone": "Asia/Jakarta",
+  "theme": "dark",
+  "style": "1",
+  "locale": "id",
+  "toolbar_bg": "#f1f3f6",
+  "enable_publishing": false,
+  "hide_top_toolbar": false,
+  "save_image": false,
+  "hide_legend": true,
+  "studies": [
+     {
+     "id": "MAExp@tv-basicstudies",
+     "version": 60,
+	 "color": '#0000FF',
+     "inputs": { 
+       "length": 50
+     }
+   },
+    {
+     "id": "MAExp@tv-basicstudies",
+     "version": 60,
+     "inputs": {
+       "length": 200
+     },
+	 },
+	   {
+     "id": "RSI@tv-basicstudies",
+
+   },
+  ],
+  "container_id": "tradingview_dca57"
+}
+  );
+  </script>
+</div>
+<!-- TradingView Widget END -->
+<style>
+.tradingview-widget-copyright{display: none;}
+  body{ margin:0px;}
+</style>
