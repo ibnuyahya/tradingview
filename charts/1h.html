@@ -19,8 +19,8 @@ var getUrlParameter = function getUrlParameter(sParam) {
 };
 
 var ct = getUrlParameter('ct');
-var symbols = 'BINANCE:'+ct+'USDT';
-symbols = 'BINANCE:BTCUSDT';
+var symbolsa = 'BINANCE:'+ct+'USDT';
+symbolsa = 'BINANCE:BTCUSDT';
 
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
@@ -31,7 +31,7 @@ symbols = 'BINANCE:BTCUSDT';
   new TradingView.widget(
   {
   "autosize": true,
-  "symbol": symbols,
+  "symbol": symbolsa,
   "interval": "60",
   "timezone": "Asia/Jakarta",
   "theme": "dark",
