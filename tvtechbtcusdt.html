@@ -1,0 +1,44 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
+
+var ct = getUrlParameter('ct');
+var tf = getUrlParameter('tf');
+var symbolsa = 'BINANCE:'+ct+'USDT';
+  alert(symbolsa);
+//symbolsa = 'BINANCE:BTCUSDT';
+</script>
+
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/BTCUSDT/technicals/" rel="noopener" target="_blank"><span class="blue-text">Technical Analysis for BTCUSDT</span></a> by TradingView</div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+  {
+  "interval": tf,
+  "width": "100%",
+  "isTransparent": false,
+  "height": "100%",
+  "symbol": ct,
+  "showIntervalTabs": true,
+  "locale": "en",
+  "colorTheme": "dark",
+     "largeChartUrl": "https://www.tradingview.com/symbols/BTCUSDT/technicals/" 
+}
+  </script>
+</div>
+<!-- TradingView Widget END -->
