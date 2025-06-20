@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Trading Kripto Perpetual</title>
+    <title>Integrated Position Analysis & PnL Calculator (OKX.com)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -54,392 +54,419 @@
             background-color: #4f46e5; /* Darker on hover */
             transform: translateY(-1px);
         }
-        .result-box {
-            background-color: #334155; /* Result box background */
-            padding: 0.8rem;
-            border-radius: 8px;
-            min-height: 40px; /* Ensure a minimum height */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
+        .copy-button-container {
+            margin-top: 1.5rem;
             text-align: center;
         }
-        .result-positive {
-            color: #34d399; /* Green for positive PnL */
+        .copy-feedback {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
-        .result-negative {
-            color: #ef4444; /* Red for negative PnL */
-        }
-        .result-neutral {
-            color: #e2e8f0; /* Default color */
-        }
-        select {
-            background-color: #475569;
-            color: #f8fafc;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            padding: 0.6rem 0.8rem;
-            width: 100%;
-            box-sizing: border-box;
-            appearance: none; /* Remove default arrow */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 1.5em;
+        .loading-text {
+            color: #fcd34d; /* Yellow for loading */
+            font-size: 0.9em;
+            margin-top: 0.25em;
+            text-align: right;
         }
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
     <div class="container mx-auto rounded-xl p-6 md:p-8 lg:p-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-400">Kalkulator Trading Kripto Perpetual</h1>
-        <p class="text-center text-sm sm:text-base text-gray-300 mb-8">Alat bantu untuk menghitung harga beli rata-rata, harga likuidasi, dan PnL Anda.</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-indigo-400">Integrated Position Analysis & PnL Calculator (OKX.com)</h1>
+        <p class="text-center text-sm sm:text-base text-gray-300 mb-8">Enter your current position data and plan your position addition strategy or calculate your PnL.</p>
 
-        <!-- Kalkulator Harga Rata-rata Masuk -->
+        <!-- Main Inputs -->
         <div class="calculator-section rounded-lg mb-6">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">1. Harga Rata-rata Masuk Baru</h2>
+            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">Current Position & Plan Data</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label for="currentEntryPrice" class="block text-gray-400 text-sm font-medium mb-1">Harga Entry Posisi Saat Ini (USDT):</label>
-                    <input type="number" id="currentEntryPrice" placeholder="Contoh: 105790" class="w-full">
+                    <label for="currentEntryPrice" class="block text-gray-400 text-sm font-medium mb-1">Current Position Entry Price (USDT):</label>
+                    <input type="number" id="currentEntryPrice" placeholder="Auto-filled with Mark Price, e.g., 105790" class="w-full">
                 </div>
                 <div>
-                    <label for="currentPositionSize" class="block text-gray-400 text-sm font-medium mb-1">Ukuran Posisi Saat Ini (USDT):</label>
-                    <input type="number" id="currentPositionSize" placeholder="Contoh: 1017.79" class="w-full">
+                    <label for="initialMarginCurrent" class="block text-gray-400 text-sm font-medium mb-1">Initial Margin (USDT) for Current Position:</label>
+                    <input type="number" id="initialMarginCurrent" placeholder="Example: 10" class="w-full" oninput="updateCurrentPositionSize()">
                 </div>
                 <div>
-                    <label for="newEntryPrice" class="block text-gray-400 text-sm font-medium mb-1">Harga Entry Posisi Baru (USDT):</label>
-                    <input type="number" id="newEntryPrice" placeholder="Contoh: 104500" class="w-full">
+                    <label for="currentPositionSize" class="block text-gray-400 text-sm font-medium mb-1">Current Position Size (USDT) <span class="text-yellow-300">(Calculated @100x leverage, but editable)</span>:</label>
+                    <input type="number" id="currentPositionSize" placeholder="Auto-calculated (e.g., 1071.81)" class="w-full">
                 </div>
                 <div>
-                    <label for="newPositionSize" class="block text-gray-400 text-sm font-medium mb-1">Ukuran Posisi Baru (USDT):</label>
-                    <input type="number" id="newPositionSize" placeholder="Contoh: 1944.70" class="w-full">
-                </div>
-            </div>
-            <button id="calculateAverage" class="w-full md:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-indigo-700 bg-indigo-600">Hitung Harga Rata-rata</button>
-            <div class="mt-4">
-                <label class="block text-gray-400 text-sm font-medium mb-1">Harga Rata-rata Masuk Baru:</label>
-                <div id="averageEntryResult" class="result-box text-lg text-green-300"></div>
-            </div>
-        </div>
-
-        <!-- Kalkulator Harga Likuidasi -->
-        <div class="calculator-section rounded-lg mb-6">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">2. Harga Likuidasi</h2>
-            <p class="text-sm text-gray-400 mb-3">
-                <span class="font-bold text-yellow-300">Catatan:</span> Estimasi ini berdasarkan total saldo dompet Anda sebagai jaminan. Harga likuidasi aktual di bursa dapat sedikit berbeda karena Maintenance Margin Rate (MMR) yang spesifik untuk setiap bursa.
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="entryPriceLiq" class="block text-gray-400 text-sm font-medium mb-1">Harga Entry (USDT):</label>
-                    <input type="number" id="entryPriceLiq" placeholder="Contoh: 105790" class="w-full">
+                    <label for="availableCrossMargin" class="block text-gray-400 text-sm font-medium mb-1">Available Cross Margin Balance (USDT):</label>
+                    <input type="number" id="availableCrossMargin" placeholder="Example: 30" class="w-full">
                 </div>
                 <div>
-                    <label for="positionSizeLiq" class="block text-gray-400 text-sm font-medium mb-1">Ukuran Posisi (USDT):</label>
-                    <input type="number" id="positionSizeLiq" placeholder="Contoh: 1017.79" class="w-full">
+                    <label for="currentMarkPrice" class="block text-gray-400 text-sm font-medium mb-1">Current Mark Price (USDT):</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="currentMarkPrice" placeholder="Fetching price..." class="w-full">
+                        <button id="updateMarkPrice" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm font-semibold transition duration-200">Update</button>
+                    </div>
+                    <div id="markPriceLoading" class="loading-text"></div>
                 </div>
                 <div>
-                    <label for="totalWalletBalanceLiq" class="block text-gray-400 text-sm font-medium mb-1">Total Saldo Dompet Cross Margin (USDT):</label>
-                    <input type="number" id="totalWalletBalanceLiq" placeholder="Contoh: 37.9960" class="w-full">
+                    <label for="desiredNewBuyPrice" class="block text-gray-400 text-sm font-medium mb-1">Target New Buy Price (Optional):</label>
+                    <input type="number" id="desiredNewBuyPrice" placeholder="Example: (Mark Price + 500)" class="w-full">
                 </div>
-                <div>
-                    <label for="positionTypeLiq" class="block text-gray-400 text-sm font-medium mb-1">Tipe Posisi:</label>
-                    <select id="positionTypeLiq" class="w-full">
+                 <div>
+                    <label for="positionType" class="block text-gray-400 text-sm font-medium mb-1">Position Type (Current & New):</label>
+                    <select id="positionType" class="w-full">
                         <option value="long">Long</option>
                         <option value="short">Short</option>
                     </select>
                 </div>
             </div>
-            <button id="calculateLiquidation" class="w-full md:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-indigo-700 bg-indigo-600">Hitung Likuidasi</button>
-            <div class="mt-4">
-                <label class="block text-gray-400 text-sm font-medium mb-1">Harga Likuidasi:</label>
-                <div id="liquidationPriceResult" class="result-box text-lg text-red-300"></div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button id="calculateAll" class="w-full sm:w-1/2 px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-indigo-700 bg-indigo-600">Calculate All</button>
+                <button id="setDefaultValues" class="w-full sm:w-1/2 px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-purple-700 bg-purple-600">Set Default Values</button>
             </div>
         </div>
 
-        <!-- Analisis Penambahan Posisi & Strategi DCA -->
+        <!-- Current PnL Results -->
         <div class="calculator-section rounded-lg mb-6">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">3. Analisis Penambahan Posisi & Strategi DCA</h2>
+            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">Current Position PnL Results</h2>
             <p class="text-sm text-gray-400 mb-3">
-                Gunakan bagian ini untuk merencanakan penambahan posisi (DCA) berdasarkan saldo USDT yang tersedia di akun *cross margin* Anda.
+                <span class="font-bold text-yellow-300">Note:</span> Liquidation price is an estimate. Actual values on exchanges may differ due to specific Maintenance Margin Rates (MMR) and other fees. Always refer to your exchange's data.
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="currentEntryPriceDCA" class="block text-gray-400 text-sm font-medium mb-1">Harga Entry Posisi Saat Ini (USDT):</label>
-                    <input type="number" id="currentEntryPriceDCA" placeholder="Contoh: 105790" class="w-full">
-                </div>
-                <div>
-                    <label for="currentPositionSizeDCA" class="block text-gray-400 text-sm font-medium mb-1">Ukuran Posisi Saat Ini (USDT):</label>
-                    <input type="number" id="currentPositionSizeDCA" placeholder="Contoh: 1017.79" class="w-full">
-                </div>
-                <div>
-                    <label for="availableCrossMarginDCA" class="block text-gray-400 text-sm font-medium mb-1">Saldo USDT Tersedia di Akun Cross Margin:</label>
-                    <input type="number" id="availableCrossMarginDCA" placeholder="Contoh: 19.4470" class="w-full">
-                </div>
-                <div>
-                    <label for="leverageDCA" class="block text-gray-400 text-sm font-medium mb-1">Leverage yang Digunakan untuk Posisi Baru:</label>
-                    <input type="number" id="leverageDCA" placeholder="Contoh: 100" class="w-full">
-                </div>
-                <div>
-                    <label for="currentMarkPriceDCA" class="block text-gray-400 text-sm font-medium mb-1">Harga Mark Saat Ini (USDT):</label>
-                    <input type="number" id="currentMarkPriceDCA" placeholder="Contoh: 104927" class="w-full">
-                </div>
-                <div>
-                    <label for="desiredNewBuyPriceDCA" class="block text-gray-400 text-sm font-medium mb-1">Harga Beli Tambahan yang Anda Targetkan (Opsional):</label>
-                    <input type="number" id="desiredNewBuyPriceDCA" placeholder="Contoh: 104500" class="w-full">
-                </div>
-            </div>
-            <button id="analyzeDCA" class="w-full md:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-indigo-700 bg-indigo-600">Analisis Strategi</button>
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-gray-400 text-sm font-medium mb-1">Maksimal Ukuran Posisi Tambahan (USDT):</label>
-                    <div id="maxAddPositionResult" class="result-box text-lg text-blue-300"></div>
-                </div>
-                <div>
-                    <label class="block text-gray-400 text-sm font-medium mb-1">Harga Beli yang Dibutuhkan untuk Posisi Floating Plus (jika tambah posisi Maksimal):</label>
-                    <div id="reqPriceToBreakEvenResult" class="result-box text-lg text-green-300"></div>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-gray-400 text-sm font-medium mb-1">Harga Rata-rata Baru (jika tambah posisi maksimal di harga target):</label>
-                    <div id="newAverageEntryDCA" class="result-box text-lg text-purple-300"></div>
-                </div>
-                 <div class="md:col-span-2">
-                    <label class="block text-gray-400 text-sm font-medium mb-1">Status PnL Setelah Penambahan (di Harga Mark Saat Ini):</label>
-                    <div id="pnlStatusAfterDCA" class="result-box text-lg"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kalkulator PnL -->
-        <div class="calculator-section rounded-lg">
-            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">4. Profit & Loss (PnL)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="entryPricePnl" class="block text-gray-400 text-sm font-medium mb-1">Harga Entry (USDT):</label>
-                    <input type="number" id="entryPricePnl" placeholder="Contoh: 105790" class="w-full">
-                </div>
-                <div>
-                    <label for="currentPricePnl" class="block text-gray-400 text-sm font-medium mb-1">Harga Saat Ini (Mark Price) (USDT):</label>
-                    <input type="number" id="currentPricePnl" placeholder="Contoh: 104927" class="w-full">
-                </div>
-                <div>
-                    <label for="positionSizePnl" class="block text-gray-400 text-sm font-medium mb-1">Ukuran Posisi (USDT):</label>
-                    <input type="number" id="positionSizePnl" placeholder="Contoh: 1017.79" class="w-full">
-                </div>
-                <div>
-                    <label for="initialMarginPnl" class="block text-gray-400 text-sm font-medium mb-1">Margin Awal (USDT) untuk Posisi ini:</label>
-                    <input type="number" id="initialMarginPnl" placeholder="Contoh: 10.17" class="w-full">
-                </div>
-                <div>
-                    <label for="positionTypePnl" class="block text-gray-400 text-sm font-medium mb-1">Tipe Posisi:</label>
-                    <select id="positionTypePnl" class="w-full">
-                        <option value="long">Long</option>
-                        <option value="short">Short</option>
-                    </select>
-                </div>
-            </div>
-            <button id="calculatePnl" class="w-full md:w-auto px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-indigo-700 bg-indigo-600">Hitung PnL</button>
             <div class="mt-4">
                 <label class="block text-gray-400 text-sm font-medium mb-1">PnL (USDT):</label>
-                <div id="pnlResultUsdt" class="result-box text-lg text-green-300"></div>
+                <div id="pnlResultUsdtCurrent" class="result-box text-lg"></div>
             </div>
              <div class="mt-4">
                 <label class="block text-gray-400 text-sm font-medium mb-1">PnL (%):</label>
-                <div id="pnlResultPercent" class="result-box text-lg text-green-300"></div>
+                <div id="pnlResultPercentCurrent" class="result-box text-lg"></div>
+            </div>
+            <div class="mt-4">
+                <label class="block text-gray-400 text-sm font-medium mb-1">Liquidation Price (USDT):</label>
+                <div id="liquidationPriceCurrent" class="result-box text-lg text-red-300"></div>
+            </div>
+        </div>
+
+        <!-- Position Addition & DCA Strategy Analysis Results -->
+        <div class="calculator-section rounded-lg">
+            <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-indigo-300">Position Addition & DCA Strategy Analysis Results</h2>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-400 text-sm font-medium mb-1">Maximum Additional Position Size (USDT) that can be opened:</label>
+                    <div id="maxAddPositionResult" class="result-box text-lg text-blue-300"></div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-400 text-sm font-medium mb-1">New Average Entry Price (if adding max position at target price):</label>
+                    <div id="newAverageEntryDCA" class="result-box text-lg text-purple-300"></div>
+                </div>
+                 <div class="md:col-span-2">
+                    <label class="block text-gray-400 text-sm font-medium mb-1">PnL After Position Addition (at Current Mark Price):</label>
+                    <div id="pnlStatusAfterDCA" class="result-box text-lg"></div>
+                </div>
+            </div>
+
+            <div class="copy-button-container">
+                <button id="copyResults" class="px-6 py-2 rounded-lg text-white font-semibold transition duration-200 hover:bg-gray-700 bg-gray-600">Copy Results to Clipboard</button>
+                <div id="copyFeedback" class="copy-feedback"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Function to safely parse float inputs
+        // Constant for fixed leverage
+        const FIXED_LEVERAGE = 100;
+        // Updated based on user's specific OKX order history for 10 USDT margin @ 100x leverage
+        const OKX_10_MARGIN_SIZE = 1071.81; 
+
+        // Helper function to format a number with 2 decimal places and thousands separators
+        function formatNumber(value) {
+            if (typeof value !== 'number' || isNaN(value)) {
+                return '';
+            }
+            // Use toLocaleString for thousands separator. Enforce 2 decimal places.
+            return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // safeParseFloat directly parses number from input[type="number"]
         function safeParseFloat(id) {
             const value = parseFloat(document.getElementById(id).value);
             return isNaN(value) ? 0 : value;
         }
 
-        // --- 1. Average Entry Price Calculator ---
-        document.getElementById('calculateAverage').addEventListener('click', () => {
+        // Function to fetch current BTC price from CoinGecko API
+        async function fetchPricesAndPopulate() {
+            const markPriceInput = document.getElementById('currentMarkPrice');
+            const entryPriceInput = document.getElementById('currentEntryPrice'); // Get the entry price input
+            const loadingText = document.getElementById('markPriceLoading');
+            
+            markPriceInput.placeholder = 'Fetching price...';
+            markPriceInput.disabled = true;
+            entryPriceInput.disabled = true; // Disable entry price input temporarily
+            if (loadingText) loadingText.textContent = 'Fetching price...';
+            
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                const btcPrice = data.bitcoin.usd;
+                if (btcPrice) {
+                    markPriceInput.value = btcPrice.toFixed(2);
+                    markPriceInput.placeholder = 'Example: 104927.00';
+                    
+                    // Populate currentEntryPrice if it's empty
+                    if (!entryPriceInput.value) { // Only fill if currently empty
+                        entryPriceInput.value = btcPrice.toFixed(2);
+                        entryPriceInput.placeholder = 'Auto-filled with Mark Price, e.g., 105790';
+                    }
+                } else {
+                    markPriceInput.placeholder = 'Failed to fetch price';
+                    entryPriceInput.placeholder = 'Failed to fetch price';
+                }
+            } catch (error) {
+                console.error("Error fetching BTC price:", error);
+                markPriceInput.placeholder = 'Failed to fetch price';
+                entryPriceInput.placeholder = 'Failed to fetch price';
+            } finally {
+                markPriceInput.disabled = false;
+                entryPriceInput.disabled = false; // Re-enable entry price input
+                if (loadingText) loadingText.textContent = '';
+            }
+        }
+
+        // Function to automatically update Current Position Size based on Initial Margin (assuming 100x leverage)
+        function updateCurrentPositionSize() {
+            const initialMargin = safeParseFloat('initialMarginCurrent');
+            const currentPositionSizeInput = document.getElementById('currentPositionSize');
+            // currentPositionSizeInput.disabled = false; // Ensure it's enabled for manual edits
+
+            if (initialMargin > 0) {
+                let calculatedSize;
+                if (initialMargin === 10) { // Specific case for 10 USDT margin as per user's OKX observation
+                    calculatedSize = OKX_10_MARGIN_SIZE; // Use the fixed 1071.81 value
+                    currentPositionSizeInput.placeholder = `Auto-calculated (${calculatedSize.toFixed(2)} for 10 USDT margin)`;
+                } else {
+                    calculatedSize = initialMargin * FIXED_LEVERAGE; // Use the general fixed leverage
+                    currentPositionSizeInput.placeholder = `Auto-calculated (${calculatedSize.toFixed(2)})`;
+                }
+                currentPositionSizeInput.value = calculatedSize.toFixed(2);
+            } else {
+                currentPositionSizeInput.value = '';
+                currentPositionSizeInput.placeholder = `Auto-calculated (e.g., ${OKX_10_MARGIN_SIZE.toFixed(2)})`;
+            }
+        }
+
+        // Initial fetch of price when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPricesAndPopulate(); // Call the combined fetch function
+            document.getElementById('updateMarkPrice').addEventListener('click', fetchPricesAndPopulate); // Use the combined function for update button
+        });
+
+
+        document.getElementById('calculateAll').addEventListener('click', () => {
+            // Get common inputs
             const currentEntryPrice = safeParseFloat('currentEntryPrice');
-            const currentPositionSize = safeParseFloat('currentPositionSize');
-            const newEntryPrice = safeParseFloat('newEntryPrice');
-            const newPositionSize = safeParseFloat('newPositionSize');
-            const resultElement = document.getElementById('averageEntryResult');
+            const currentPositionSize = safeParseFloat('currentPositionSize'); // This will now be auto-calculated or manually set
+            const currentMarkPrice = safeParseFloat('currentMarkPrice');
+            const positionType = document.getElementById('positionType').value;
 
-            if (currentPositionSize + newPositionSize === 0) {
-                resultElement.textContent = 'Ukuran posisi total tidak boleh nol.';
-                resultElement.className = 'result-box text-lg result-neutral';
-                return;
+            // Inputs for PnL Current
+            const initialMarginCurrent = safeParseFloat('initialMarginCurrent');
+            const availableCrossMargin = safeParseFloat('availableCrossMargin'); // Needed for liquidation
+
+            // Inputs for DCA Analysis
+            const desiredNewBuyPrice = safeParseFloat('desiredNewBuyPrice'); // Optional input
+
+            // --- Current Position PnL Results Calculation ---
+            const pnlUsdtElement = document.getElementById('pnlResultUsdtCurrent');
+            const pnlPercentElement = document.getElementById('pnlResultPercentCurrent');
+            const liquidationPriceElement = document.getElementById('liquidationPriceCurrent'); // New element
+
+            if (currentEntryPrice <= 0 || currentMarkPrice <= 0 || currentPositionSize <= 0) {
+                pnlUsdtElement.textContent = 'PnL inputs must be greater than zero.';
+                pnlUsdtElement.className = 'result-box text-lg result-neutral';
+                pnlPercentElement.textContent = '';
+                pnlPercentElement.className = 'result-box text-lg result-neutral';
+                liquidationPriceElement.textContent = ''; // Clear liquidation
+                liquidationPriceElement.className = 'result-box text-lg result-neutral';
+            } else {
+                let pnlUsdt;
+                if (positionType === 'long') {
+                    pnlUsdt = ((currentMarkPrice - currentEntryPrice) / currentEntryPrice) * currentPositionSize;
+                } else { // short
+                    pnlUsdt = ((currentEntryPrice - currentMarkPrice) / currentEntryPrice) * currentPositionSize; 
+                }
+
+                pnlUsdtElement.textContent = `${formatNumber(pnlUsdt)} USDT`;
+                if (pnlUsdt > 0) {
+                    pnlUsdtElement.className = 'result-box text-lg result-positive';
+                } else if (pnlUsdt < 0) {
+                    pnlUsdtElement.className = 'result-box text-lg result-negative';
+                } else {
+                    pnlUsdtElement.className = 'result-box text-lg result-neutral';
+                }
+
+                let pnlPercent = 0;
+                if (initialMarginCurrent > 0) {
+                    pnlPercent = (pnlUsdt / initialMarginCurrent) * 100;
+                    pnlPercentElement.textContent = `${pnlPercent.toFixed(2)} %`; // Percentage should remain 2 decimal, not currency format
+                    if (pnlPercent > 0) {
+                        pnlPercentElement.className = 'result-box text-lg result-positive';
+                    } else if (pnlPercent < 0) {
+                        pnlPercentElement.className = 'result-box text-lg result-negative';
+                    } else {
+                        pnlPercentElement.className = 'result-box text-lg result-neutral';
+                    }
+                } else {
+                    pnlPercentElement.textContent = 'Enter Initial Margin for PnL %';
+                    pnlPercentElement.className = 'result-box text-lg result-neutral';
+                }
+
+                // --- Liquidation Price Calculation ---
+                // Total margin available for liquidation, assuming cross mode takes initial + available balance
+                const totalMarginForLiq = initialMarginCurrent + availableCrossMargin;
+                let liquidationPrice = 0;
+                // Calculate percentage price movement that total margin can cover
+                // Ensure currentPositionSize is not zero to avoid division by zero
+                if (currentPositionSize > 0) {
+                    const priceChangePercentageForLiq = totalMarginForLiq / currentPositionSize;
+
+                    if (positionType === 'long') {
+                        liquidationPrice = currentEntryPrice * (1 - priceChangePercentageForLiq);
+                        if (liquidationPrice < 0) liquidationPrice = 0; // Prevent negative liquidation price
+                    } else { // short
+                        liquidationPrice = currentEntryPrice * (1 + priceChangePercentageForLiq);
+                    }
+                }
+                
+                liquidationPriceElement.textContent = `${formatNumber(liquidationPrice)} USDT`;
+                if (positionType === 'long') {
+                    if (liquidationPrice < currentMarkPrice) { // If liquidation is below current price for long, it's closer to danger
+                        liquidationPriceElement.className = 'result-box text-lg result-negative';
+                    } else {
+                        liquidationPriceElement.className = 'result-box text-lg result-positive'; // Safer distance
+                    }
+                } else { // short
+                    if (liquidationPrice > currentMarkPrice) { // If liquidation is above current price for short, it's closer to danger
+                        liquidationPriceElement.className = 'result-box text-lg result-negative';
+                    } else {
+                        liquidationPriceElement.className = 'result-box text-lg result-positive'; // Safer distance
+                    }
+                }
             }
 
-            const totalValue = (currentEntryPrice * currentPositionSize) + (newEntryPrice * newPositionSize);
-            const totalSize = currentPositionSize + newPositionSize;
-            const averagePrice = totalValue / totalSize;
 
-            resultElement.textContent = `${averagePrice.toFixed(2)} USDT`;
-            resultElement.className = 'result-box text-lg result-positive';
-        });
-
-        // --- 2. Liquidation Price Calculator ---
-        document.getElementById('calculateLiquidation').addEventListener('click', () => {
-            const entryPriceLiq = safeParseFloat('entryPriceLiq');
-            const positionSizeLiq = safeParseFloat('positionSizeLiq'); // Total notional size of position
-            const totalWalletBalanceLiq = safeParseFloat('totalWalletBalanceLiq'); // Total USDT in cross wallet
-            const positionTypeLiq = document.getElementById('positionTypeLiq').value;
-            const resultElement = document.getElementById('liquidationPriceResult');
-
-            if (entryPriceLiq <= 0 || positionSizeLiq <= 0 || totalWalletBalanceLiq <= 0) {
-                resultElement.textContent = 'Semua input harus lebih dari nol.';
-                resultElement.className = 'result-box text-lg result-neutral';
-                return;
-            }
-
-            // The maximum amount of PnL loss the total wallet balance can cover.
-            // This is a simplified model. Actual exchange liquidation often considers
-            // Maintenance Margin Rate (MMR) which means liquidation happens before
-            // the entire wallet balance is depleted.
-            const maxLossAmount = totalWalletBalanceLiq;
-
-            // Percentage drop (for long) or rise (for short) of the position value
-            // that the maxLossAmount can cover.
-            const percentageToLiq = maxLossAmount / positionSizeLiq;
-
-            let liquidationPrice;
-            if (positionTypeLiq === 'long') {
-                liquidationPrice = entryPriceLiq * (1 - percentageToLiq);
-                // Ensure liquidation price does not go below zero for extreme cases, though unlikely with typical inputs
-                if (liquidationPrice < 0) liquidationPrice = 0; 
-            } else { // short
-                liquidationPrice = entryPriceLiq * (1 + percentageToLiq);
-            }
-
-            resultElement.textContent = `${liquidationPrice.toFixed(2)} USDT`;
-            resultElement.className = 'result-box text-lg result-negative';
-        });
-
-        // --- 3. Position Addition & DCA Strategy Analysis ---
-        document.getElementById('analyzeDCA').addEventListener('click', () => {
-            const currentEntryPrice = safeParseFloat('currentEntryPriceDCA');
-            const currentPositionSize = safeParseFloat('currentPositionSizeDCA');
-            const availableCrossMargin = safeParseFloat('availableCrossMarginDCA');
-            const leverage = safeParseFloat('leverageDCA');
-            const currentMarkPrice = safeParseFloat('currentMarkPriceDCA');
-            const desiredNewBuyPrice = safeParseFloat('desiredNewBuyPriceDCA'); // Optional input
-
+            // --- Position Addition & DCA Strategy Analysis Results ---
             const maxAddPositionResult = document.getElementById('maxAddPositionResult');
-            const reqPriceToBreakEvenResult = document.getElementById('reqPriceToBreakEvenResult');
             const newAverageEntryDCA = document.getElementById('newAverageEntryDCA');
             const pnlStatusAfterDCA = document.getElementById('pnlStatusAfterDCA');
 
-            // Reset results
+            // Reset results for DCA
             maxAddPositionResult.textContent = '';
-            reqPriceToBreakEvenResult.textContent = '';
             newAverageEntryDCA.textContent = '';
             pnlStatusAfterDCA.textContent = '';
             pnlStatusAfterDCA.className = 'result-box text-lg result-neutral';
 
-            if (currentEntryPrice <= 0 || currentPositionSize <= 0 || availableCrossMargin <= 0 || leverage <= 0 || currentMarkPrice <= 0) {
-                maxAddPositionResult.textContent = 'Semua input wajib harus lebih dari nol.';
+            if (currentEntryPrice <= 0 || currentPositionSize <= 0 || availableCrossMargin <= 0 || currentMarkPrice <= 0) {
+                maxAddPositionResult.textContent = 'All mandatory inputs must be greater than zero for DCA Analysis.';
                 maxAddPositionResult.className = 'result-box text-lg result-neutral';
                 return;
             }
 
             // 1. Calculate Maximum Additional Position Size
-            const maxAddSize = availableCrossMargin * leverage;
-            maxAddPositionResult.textContent = `${maxAddSize.toFixed(2)} USDT`;
-
-            // 2. Calculate Required New Buy Price to Break Even (or achieve Floating Plus) with Max Add Size
-            // Target average entry is slightly below current mark price to ensure floating profit
-            const targetAverageEntryForProfit = currentMarkPrice - (currentMarkPrice * 0.0001); // Aim for 0.01% profit margin
+            const maxAddSize = availableCrossMargin * FIXED_LEVERAGE; // Use the fixed leverage
+            maxAddPositionResult.textContent = `${formatNumber(maxAddSize)} USDT`;
             
-            let requiredPriceForBE;
-            if (maxAddSize + currentPositionSize === 0) { // Avoid division by zero
-                 requiredPriceForBE = 0; // Cannot calculate if total size is zero
-            } else {
-                 requiredPriceForBE = (targetAverageEntryForProfit * (currentPositionSize + maxAddSize) - (currentEntryPrice * currentPositionSize)) / maxAddSize;
-            }
-           
-            reqPriceToBreakEvenResult.textContent = `${requiredPriceForBE.toFixed(2)} USDT`;
-
-            // 3. Calculate New Average Entry if user buys maxAddSize at desiredNewBuyPriceDCA
+            // 2. Calculate New Average Entry if user buys maxAddSize at desiredNewBuyPrice
             let actualNewAverageEntry = 0;
-            if (desiredNewBuyPrice > 0) {
-                if (currentPositionSize + maxAddSize === 0) {
-                    actualNewAverageEntry = 0; // Avoid division by zero
-                } else {
-                    actualNewAverageEntry = ((currentEntryPrice * currentPositionSize) + (desiredNewBuyPrice * maxAddSize)) / (currentPositionSize + maxAddSize);
-                }
-                newAverageEntryDCA.textContent = `${actualNewAverageEntry.toFixed(2)} USDT`;
+            let pnlAfterDCA = 0;
+            let totalNewPositionSize = 0;
 
-                // PnL Status after adding at desired new buy price
-                if (actualNewAverageEntry < currentMarkPrice) {
-                    pnlStatusAfterDCA.textContent = 'Profit Mengambang (Floating Plus)';
+            if (desiredNewBuyPrice > 0) {
+                totalNewPositionSize = currentPositionSize + maxAddSize;
+                if (totalNewPositionSize === 0) {
+                    actualNewAverageEntry = 0;
+                    pnlAfterDCA = 0;
+                } else {
+                    actualNewAverageEntry = ((currentEntryPrice * currentPositionSize) + (desiredNewBuyPrice * maxAddSize)) / totalNewPositionSize;
+
+                    if (positionType === 'long') {
+                        pnlAfterDCA = ((currentMarkPrice - actualNewAverageEntry) / actualNewAverageEntry) * totalNewPositionSize;
+                    } else {
+                        pnlAfterDCA = ((actualNewAverageEntry - currentMarkPrice) / actualNewAverageEntry) * totalNewPositionSize;
+                    }
+                }
+                
+                newAverageEntryDCA.textContent = `${formatNumber(actualNewAverageEntry)} USDT`;
+
+                pnlStatusAfterDCA.textContent = `${formatNumber(pnlAfterDCA)} USDT`;
+                if (pnlAfterDCA > 0) {
                     pnlStatusAfterDCA.className = 'result-box text-lg result-positive';
-                } else if (actualNewAverageEntry > currentMarkPrice) {
-                    pnlStatusAfterDCA.textContent = 'Rugi Mengambang (Floating Minus)';
+                } else if (pnlAfterDCA < 0) {
                     pnlStatusAfterDCA.className = 'result-box text-lg result-negative';
                 } else {
-                    pnlStatusAfterDCA.textContent = 'Titik Impas (Break Even)';
                     pnlStatusAfterDCA.className = 'result-box text-lg result-neutral';
                 }
+
             } else {
-                newAverageEntryDCA.textContent = 'Masukkan Harga Beli Tambahan yang Anda Targetkan untuk melihat estimasi.';
+                newAverageEntryDCA.textContent = 'Enter a Target New Buy Price to see estimate.';
                 newAverageEntryDCA.className = 'result-box text-lg result-neutral';
-                pnlStatusAfterDCA.textContent = 'Tidak dapat dihitung tanpa Harga Beli Tambahan.';
+                pnlStatusAfterDCA.textContent = 'Cannot calculate without Target New Buy Price.';
                 pnlStatusAfterDCA.className = 'result-box text-lg result-neutral';
             }
         });
 
-        // --- 4. PnL Calculator ---
-        document.getElementById('calculatePnl').addEventListener('click', () => {
-            const entryPricePnl = safeParseFloat('entryPricePnl');
-            const currentPricePnl = safeParseFloat('currentPricePnl');
-            const positionSizePnl = safeParseFloat('positionSizePnl'); // Total notional size of position in USDT
-            const initialMarginPnl = safeParseFloat('initialMarginPnl'); // Initial margin for this specific position
-            const positionTypePnl = document.getElementById('positionTypePnl').value;
-            const pnlUsdtElement = document.getElementById('pnlResultUsdt');
-            const pnlPercentElement = document.getElementById('pnlResultPercent');
-
-            if (entryPricePnl <= 0 || currentPricePnl <= 0 || positionSizePnl <= 0) {
-                pnlUsdtElement.textContent = 'Semua input harus lebih dari nol.';
-                pnlUsdtElement.className = 'result-box text-lg result-neutral';
-                pnlPercentElement.textContent = '';
-                pnlPercentElement.className = 'result-box text-lg result-neutral';
-                return;
-            }
-
-            let pnlUsdt;
-            if (positionTypePnl === 'long') {
-                pnlUsdt = ((currentPricePnl - entryPricePnl) / entryPricePnl) * positionSizePnl;
-            } else { // short
-                pnlUsdt = ((entryPricePnl - currentPricePnl) / entryPricePnl) * positionSizePnl;
-            }
-
-            pnlUsdtElement.textContent = `${pnlUsdt.toFixed(2)} USDT`;
-            if (pnlUsdt > 0) {
-                pnlUsdtElement.className = 'result-box text-lg result-positive';
-            } else if (pnlUsdt < 0) {
-                pnlUsdtElement.className = 'result-box text-lg result-negative';
+        // Function to set default values
+        document.getElementById('setDefaultValues').addEventListener('click', () => {
+            // document.getElementById('currentEntryPrice').value is NOT replaced by default, as per user request.
+            document.getElementById('initialMarginCurrent').value = 10; // Set default to 10
+            updateCurrentPositionSize(); // Calculate based on new default initial margin (will use 1071.81)
+            document.getElementById('availableCrossMargin').value = 30; // Set default to 30
+            
+            // Set Target New Buy Price based on Current Mark Price + 500
+            const currentMarkPriceValue = safeParseFloat('currentMarkPrice');
+            if (currentMarkPriceValue > 0) {
+                document.getElementById('desiredNewBuyPrice').value = currentMarkPriceValue + 500;
+                document.getElementById('desiredNewBuyPrice').placeholder = `Example: ${formatNumber(currentMarkPriceValue + 500)}`;
             } else {
-                pnlUsdtElement.className = 'result-box text-lg result-neutral';
+                document.getElementById('desiredNewBuyPrice').value = '';
+                document.getElementById('desiredNewBuyPrice').placeholder = 'Example: (Mark Price + 500)';
             }
 
-            let pnlPercent = 0; // Only one declaration for pnlPercent
-            if (initialMarginPnl > 0) {
-                pnlPercent = (pnlUsdt / initialMarginPnl) * 100;
-                pnlPercentElement.textContent = `${pnlPercent.toFixed(2)} %`;
-                if (pnlPercent > 0) {
-                    pnlPercentElement.className = 'result-box text-lg result-positive';
-                } else if (pnlPercent < 0) {
-                    pnlPercentElement.className = 'result-box text-lg result-negative';
-                } else {
-                    pnlPercentElement.className = 'result-box text-lg result-neutral';
-                }
-            } else {
-                pnlPercentElement.textContent = 'Masukkan Margin Awal untuk PnL %';
-                pnlPercentElement.className = 'result-box text-lg result-neutral';
-            }
+            document.getElementById('positionType').value = 'long';
+        });
+
+
+        document.getElementById('copyResults').addEventListener('click', () => {
+            let copyText = "=== Input Data ===\n";
+            copyText += `Current Position Entry Price: ${document.getElementById('currentEntryPrice').value} USDT\n`;
+            copyText += `Initial Margin for Current Position: ${document.getElementById('initialMarginCurrent').value} USDT\n`;
+            copyText += `Current Position Size (Total Notional): ${document.getElementById('currentPositionSize').value} USDT\n`;
+            copyText += `Available Cross Margin Balance: ${document.getElementById('availableCrossMargin').value} USDT\n`;
+            copyText += `Leverage for New Positions: ${FIXED_LEVERAGE}x\n`; // Use the constant
+            copyText += `Current Mark Price: ${document.getElementById('currentMarkPrice').value} USDT\n`;
+            copyText += `Target New Buy Price: ${document.getElementById('desiredNewBuyPrice').value} USDT\n`;
+            copyText += `Position Type: ${document.getElementById('positionType').value}\n\n`;
+
+            copyText += "=== Current Position PnL Results ===\n";
+            copyText += `PnL (USDT): ${document.getElementById('pnlResultUsdtCurrent').textContent}\n`;
+            copyText += `PnL (%): ${document.getElementById('pnlResultPercentCurrent').textContent}\n`;
+            copyText += `Liquidation Price (USDT): ${document.getElementById('liquidationPriceCurrent').textContent}\n\n`; // Added liquidation price to copy
+
+            copyText += "=== Position Addition & DCA Strategy Analysis Results ===\n";
+            copyText += `Maximum Additional Position Size (USDT) that can be opened: ${document.getElementById('maxAddPositionResult').textContent}\n`;
+            copyText += `New Average Entry Price (if adding max position at target price): ${document.getElementById('newAverageEntryDCA').textContent}\n`;
+            copyText += `PnL After Position Addition (at Current Mark Price): ${document.getElementById('pnlStatusAfterDCA').textContent}\n`;
+
+            // Create a temporary textarea to hold the text
+            const textarea = document.createElement('textarea');
+            textarea.value = copyText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const feedbackElement = document.getElementById('copyFeedback');
+            feedbackElement.textContent = 'Successfully copied to clipboard!';
+            setTimeout(() => {
+                feedbackElement.textContent = '';
+            }, 3000); // Clear feedback after 3 seconds
         });
     </script>
 </body>
